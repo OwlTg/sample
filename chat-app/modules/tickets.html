@@ -1,0 +1,79 @@
+
+    <div nav-bar ctrl="ticketsCtrl"></div>
+    <div class="chat-messaging-wrapper">
+        <div class="inbox_msg">
+            <div class="inbox_people">
+                <!--        <div class="headind_srch">-->
+                <!--          <div class="srch_bar">-->
+                <!--          <div class="form-group has-search">-->
+                <!--            <span class="fa fa-search form-control-feedback"></span>-->
+                <!--            <input type="text" class="form-control" placeholder="Search">-->
+                <!--          </div>-->
+                <!--          </div>-->
+                <!--        </div>-->
+                <div class="chat-myactivechat" active-chat-container message-count="ticketsCtrl.messageCount" active-tickets="ticketsCtrl.activeTickets" get-active-tickets-fn="ticketsCtrl.getActiveTickets" get-next-queued-fn="ticketsCtrl.getNextQueuedChat" queued-tickets="ticketsCtrl.queuedTickets" new-reassignment="ticketsCtrl.newReassignment" notification-list="ticketsCtrl.notificationList" clicked-reassign="ticketsCtrl.clickReassignNotif" unclicked-count="ticketsCtrl.unclickedCount" reassignment-feedback="ticketsCtrl.reassignmentFeedback" agent-id="ticketsCtrl.agentId" show-notification="showNotification" toggle-notification="ticketsCtrl.toggleNotification" active-reassign-ticket-modal="ticketsCtrl.activeReassignTicketModal"></div>
+                <div class="chat-customerinqueue" queue-chat-container message-count="ticketsCtrl.messageCount"  active-tickets="ticketsCtrl.activeTickets" queued-tickets="ticketsCtrl.queuedTickets" get-queued-tickets-fn="ticketsCtrl.getQueuedTickets"  ></div>
+            </div>
+            <ui-view></ui-view>
+            <div class="h-100">
+                <div class="thread-wrapper">
+                    <div class="thread-container">
+                        <div ng-if="ticketCtrl.activeTicket.length > 0" class="thread-header p-3" >
+                            <div class="row d-flex align-items-center" >
+                                <div class="col">
+                                    <p class="text-secondary mb-0"><strong>{{ticketCtrl.activeTicket.name}}</strong></p>
+                                    <p class="text-secondary mb-0"><strong>{{ticketCtrl.activeTicket.customerName ? ticketCtrl.activeTicket.customerName : ticketCtrl.activeTicket.mobileNumber}}</strong></p>
+                                    <div class="d-flex">
+                                        <p class="chat-header-ticket-number text-secondary small text-muted mb-0">Ticket #{{ticketCtrl.activeTicket.ticketReferenceId}}</p>
+                                    </div>
+                                </div>
+                                <div class="col-auto text-right">
+                                    <div class="d-flex justify-content-end">
+                                        <!-- <div class="pr-1 thread-search d-flex"> -->
+                                        <div class="pr-1 thread-search d-none">
+                                            <input type="text" placeholder="Search Conversation" />
+                                            <span class="thread-header--icon thread-search__icon align-self-center"></span>
+                                        </div>
+                                        <div class="test d-flex align-items-center">
+                                            <a id="test-button" class="btn btn-primary reassign-btn" ng-click="ticketCtrl.reassignTicket()" uib-tooltip="Reassign to another agent" tooltip-placement="bottom"  ng-class="{'disabled': ticketsCtrl.disableReassignButton || !ticketCtrl.activeTicket }">
+                                                <img src="/assets/images/chat-reassign-icon.svg" alt="reassign check icon">
+                                                <span class="text-white small">Reassign</span>
+                                            </a>
+                                        </div>
+                                        <div class="pl-2 test d-flex align-items-center close-chat-container position-relative p-2 pr-0">
+                                            <div ng-disabled="ticketCtrl.disableCloseTicket || !ticketCtrl.activeTicket" tabindex="0" style="cursor: {{(ticketCtrl.disableCloseTicket || !ticketCtrl.activeTicket) ? 'auto' :'pointer' }};"  class="close-chat-button btn w-100 d-flex align-items-center" ng-class="{'disabled': ticketCtrl.disableCloseTicket || !ticketCtrl.activeTicket }">
+                                                <img class="pr-1" src="/assets/images/close-check-icon.svg" alt="">
+                                                <span class="text-white small">Close</span>
+                                                <div class="close-chat-popup" >
+                                                    <div class="text-secondary mb-0"><span style="cursor: default; margin-top: 6px;">End this chat?</span>
+                                                        <a class="text-primary btn btn-link p-0 m-0 border-0" style="cursor: pointer;" ng-click="ticketCtrl.closeTicket()">Yes</a>
+                                                        <span style="color:#00000020;"> |</span>
+                                                        <button  class="text-primary btn btn-link p-0 m-0 border-0" >No</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="thread-chatbox-wrapper" chat-box ctrl="ticketCtrl" messages="ticketCtrl.messages" messages-state="ticketCtrl.state.messages">
+
+                        </div>
+                    </div>
+                </div>
+                <div class="chat_detailsf">
+                    <div chat-details-profile ticket="ticketCtrl.activeTicket"></div>
+                </div>
+            </div>
+
+            <script>
+                $(function () {
+                    $('[data-toggle="tooltip"]').tooltip()
+                })
+            </script>
+
+            </div>
+        </div>
+    </div>

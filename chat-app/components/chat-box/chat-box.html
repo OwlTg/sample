@@ -1,0 +1,243 @@
+<div class="chatbox-wrapper bg-white">
+  <div class="mesgs p-3">
+    <p ng-if="messagesState.hasPrevious" class="previous-message__loader btn text-secondary text-center small">Previous Messages
+      <img class="d-none chat-loader__gif pb-1" src="/assets/images/loading-spinner.gif" alt="load more icon">
+    </p>
+
+    <div class="msg_history" id="msg_history">
+      <!-- Start: No active chat and queue-->
+      <div class=" text-center" ng-if="blankStateType == 'Existing User'" style="margin-top:8rem;">
+        <img class="img-fluid" src="/assets/images/blank-page-chat-img.png" alt="blank page chat image">
+        <p class="text-secondary">Hi {{user_name}}! You have no customers waiting.<br/>
+          You’re doing a great job!</p>
+      </div>
+      <!-- End: No active chat and queue-->
+      <!-- Start: No active chat and queue-->
+      <div class="text-center" ng-if="blankStateType == 'Customer Waiting'" style="margin-top:8rem;">
+        <img class="img-fluid" src="/assets/images/blank-page-chat-img-greyscale.png" alt="blank page chat image">
+        <p class="text-secondary">Hi {{user_name}}! You have customers waiting in queue.<br/>
+          Select <a class="text-primary" href=""  ng-click="getNextQueuedChat()">Next Customer</a> to reply.</p>
+      </div>
+      <!-- End: No active chat and queue-->
+      <!-- Start: New User-->
+      <div class="text-center" ng-if="blankStateType == 'New User'" style="margin-top:8rem;">
+        <img class="img-fluid" src="/assets/images/blank-page-chat-img.png" alt="blank page chat image">
+        <p class="text-secondary">Hi, {{user_name}}! Welcome to your brand new Chat Inbox.<br/>
+          Let’s get started!</p>
+        <!--          <button class="btn btn-warning text-white">Take a tour</button>-->
+      </div>
+      <!-- End: New User-->
+      <div id="chat-message-{{message.id}}" class="my-3" ng-class="{'incoming_msg': message.messageTypeCode === 'inbound', 'outgoing_msg': message.messageTypeCode === 'outbound'}" ng-repeat="message in messages">
+        <div ng-if="showDateGroup($index)" class="message-date-group">
+          <p class="text-secondary small text-muted mb-0">{{getDateGroup(message)}}</p>
+        </div>
+
+        <!-- inbound -->
+        <div class="thread-message--fade" ng-if="message.messageTypeCode === 'inbound'">
+          <div class="row d-inline-flex mr-2">
+            <div class="col-auto pr-0 mr-2" ng-if="message.messageTypeCode === 'inbound'">
+              <img class="thread-messages_thumbnail" src="/assets/images/thumbnail-default.svg" alt="thumbnail">
+            </div>
+            <div id="viber-campaign-image-preview-{{message.id}}" class="viber-campaign-image-container-inbound" style="background-image: url('{{message.image}}');" ng-hide="!message.image">
+              <span class="thread-message__details text-white text-right thread-message__details-image campaign-image-textoverlay-shadow" ng-hide="!message.image">  {{message.dateReceived | date : 'h:mm a'}} &bull; {{message.channelTypeCode}}
+                <span ng-show="message.channelTypeCode == 'sms'" class="thread-message--icon chat__sms" data-toggle="tooltip" title="SMS"></span>
+                <span ng-show="message.channelTypeCode == 'viber'" class="thread-message--icon chat__viber" data-toggle="tooltip" title="Viber"></span>
+                <span ng-show="message.channelTypeCode == 'whatsapp'" class="thread-message--icon chat__whatsapp" data-toggle="tooltip" title="Whatsapp"></span>
+                <span ng-show="message.channelTypeCode == 'wechat'" class="thread-message--icon chat__wechat" data-toggle="tooltip" title="Wechat"></span>
+                <span ng-show="message.channelTypeCode == 'messenger'" class="thread-message--icon chat__messenger" data-toggle="tooltip" title="Messenger"></span>
+              </span>
+            </div>
+            <div class="thread-messages-box col mb-2 " id='message-id-{{message.id}}' ng-hide="message.image">
+              <p class="chatbox-text-wrap text-secondary mb-2" ng-repeat="text in breakByNewLine(message.text) track by $index">{{text}} &nbsp;</p>
+              <span class="thread-message__details text-secondary text-muted text-right" ng-hide="message.image">  {{message.dateReceived | date : 'h:mm a'}} &bull; {{message.channelTypeCode}}
+                  <span ng-show="message.channelTypeCode == 'sms'" class="thread-message--icon chat__sms" data-toggle="tooltip" title="SMS"></span>
+                  <span ng-show="message.channelTypeCode == 'viber'" class="thread-message--icon chat__viber" data-toggle="tooltip" title="Viber"></span>
+                  <span ng-show="message.channelTypeCode == 'whatsapp'" class="thread-message--icon chat__whatsapp" data-toggle="tooltip" title="Whatsapp"></span>
+                  <span ng-show="message.channelTypeCode == 'wechat'" class="thread-message--icon chat__wechat" data-toggle="tooltip" title="Wechat"></span>
+                  <span ng-show="message.channelTypeCode == 'messenger'" class="thread-message--icon chat__messenger" data-toggle="tooltip" title="Messenger"></span>
+                </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- outbound -->
+        <div class="outgoing_msg" ng-if="message.messageTypeCode === 'outbound' || message.messageTypeCode === 'autoreply'">
+          <!-- Delivered | Clicked | Sent, Double check Icon. Remove display none to display -->
+          <div class="row mx-0 thread-message--fade flex-row-reverse float-right">
+            <div class="col-auto pl-0 pr-0 ml-2">
+              <img class="thread-messages_thumbnail" src="/assets/images/thumbnail-default.svg" alt="thumbnail">
+            </div>
+            <!-- Notes for modifier classes: chatbox-outbound = Delivered, Clicked, Sent  |  chatbox-outbound--failed = Viber 2Resend Way - Error  |  chatbox-outbound--bounced = Viber 2 Way - Bounced  -->
+            <div id="viber-campaign-image-preview-{{message.id}}" class="viber-campaign-image-container " style="background-image: url('{{message.image}}');"  ng-hide="!message.image">
+              <div class="{{(message.sendStatusCode === 'queued' || message.sendStatusCode === 'pending' || !message.sendStatusCode || message.dlrStatusCode === 'pending' && message.seenStatusCode === false )? 'viber-campaign-image-container-before': 'viber-campaign-image-container-after'}}"></div>
+              <p class="mb-0 thread-message__details text-right thread-message-status-capitalized thread-message__details-image">
+                <!--  Send status -->
+                <span ng-show="!(message.messageTypeCode === 'outbound' || message.messageTypeCode === 'autoreply') && !message.dlrStatusCode || message.dlrStatusCode === null" ng-class="{'text-white campaign-image-textoverlay-shadow show-error-icon' : message.sendStatusCode === null || message.sendStatusCode === 'error',' text-white campaign-image-textoverlay-shadow show-double-check-icon' : message.sendStatusCode != null && message.sendStatusCode != 'error' }" data-toggle="tooltip" title="Outbound">
+                <img class="thread-message__status-icon-error error-icon" src="/assets/images/sending-failed-icon.png" alt="sending icon">
+                <img class="thread-message__status-icon double-check-icon" src="/assets/images/double-check-white.svg" alt="sending icon">
+                {{message.sendStatusCode === 'queued' || message.sendStatusCode === 'pending' || !message.sendStatusCode || message.dlrStatusCode === 'pending' && message.seenStatusCode === false ? 'Sending' :message.sendStatusName}}</span>
+
+                <!--  DLR status -->
+                <span ng-show="(message.messageTypeCode === 'outbound' || message.messageTypeCode === 'autoreply') && message.dlrStatusCode && message.seenStatusCode === false && message.dlrStatusCode != 'pending' " class="text-white campaign-image-textoverlay-shadow" data-toggle="tooltip" title="Outbound">
+                <img class="thread-message__status-icon" src="/assets/images/double-check-white.svg" alt="sending icon">
+                {{getDlrStatusName(message.dlrStatusCode)}}</span>
+
+                <!--  Seen status -->
+                <span ng-show="(message.messageTypeCode === 'outbound' || message.messageTypeCode === 'autoreply') && message.seenStatusCode === true" class="text-white campaign-image-textoverlay-shadow" data-toggle="tooltip" title="Outbound">
+                <img class="thread-message__status-icon" src="/assets/images/double-check-white.svg" alt="sending icon">
+                Seen </span>
+                <span class="text-white campaign-image-textoverlay-shadow">&bull;</span>
+
+                <!-- end: Status Icons -->
+                <span class="thread-message__status text-white campaign-image-textoverlay-shadow" >
+                {{message.dateReceived | date : 'h:mm a'}} <span class="text-white campaign-image-textoverlay-shadow">&bull;</span> {{message.channelTypeCode}} </span>
+                <span ng-show="message.channelTypeCode == 'viber'" class="thread-message--icon chat__viber" data-toggle="tooltip" title="Outbound"></span>
+                <span ng-show="message.channelTypeCode == 'sms'" class="thread-message--icon chat__sms" data-toggle="tooltip" title="Outbound"></span>
+                <span ng-show="message.channelTypeCode == 'whatsapp'" class="thread-message--icon chat__whatsapp" data-toggle="tooltip" title="Outbound"></span>
+                <span ng-show="message.channelTypeCode == 'messenger'" class="thread-message--icon chat__messenger" data-toggle="tooltip" title="Outbound"></span>
+                <span ng-show="message.channelTypeCode == 'wechat'" class="thread-message--icon chat__wechat" data-toggle="tooltip" title="Outbound"></span>
+                <span class="d-none thread-message__status text-danger">11:01 AM Sending Failed! <img src="/assets/images/sending-failed-icon.png" alt="sending failed icon"></span>
+              </p>
+              <img ng-if="message.sendStatusCode === 'queued' || message.sendStatusCode === 'pending' || !message.sendStatusCode || message.dlrStatusCode === 'pending' && message.seenStatusCode === false" class="chat-attachment-spinner-loader" src="/assets/images/chat-spinner-loader.gif" alt="loader spinner">
+            </div>
+            <div class="col" ng-hide="message.image" ng-class="{'chatbox-outbound chatbox-outbound--failed': message.sendStatusCode === null || message.sendStatusCode === 'error','chatbox-outbound' : message.sendStatusCode != null && message.sendStatusCode != 'error' }">
+              <p class="chatbox-text-wrap mb-2" ng-hide="message.image" ng-repeat="text in breakByNewLine(message.text) track by $index" >{{text}}&nbsp;</p>
+              <p class="mb-0 thread-message__details text-right thread-message-status-capitalized ">
+                <!--  Send status -->
+                <span ng-show="!(message.messageTypeCode === 'outbound' || message.messageTypeCode === 'autoreply') && !message.dlrStatusCode || message.dlrStatusCode === null" ng-class="{'text-danger show-error-icon' : message.sendStatusCode === null || message.sendStatusCode === 'error',' text-secondary text-muted show-double-check-icon' : message.sendStatusCode != null && message.sendStatusCode != 'error' }" data-toggle="tooltip" title="Outbound">
+                    <img class="thread-message__status-icon-error error-icon" src="/assets/images/sending-failed-icon.png" alt="sending icon">
+                    <img class="thread-message__status-icon double-check-icon" src="/assets/images/double-check.svg" alt="sending icon">
+                    {{message.sendStatusCode === 'queued' || message.sendStatusCode === 'pending' || !message.sendStatusCode || message.dlrStatusCode === 'pending' && message.seenStatusCode === false ? 'Sending' :message.sendStatusName}}</span>
+                <!--  DLR status -->
+                <span ng-show="(message.messageTypeCode === 'outbound' || message.messageTypeCode === 'autoreply') && message.dlrStatusCode && message.seenStatusCode === false && message.dlrStatusCode != 'pending' " class="text-muted" data-toggle="tooltip" title="Outbound">
+                    <img class="thread-message__status-icon" src="/assets/images/double-check.svg" alt="sending icon">
+                    {{getDlrStatusName(message.dlrStatusCode)}}</span>
+                <!--  Seen status -->
+                <span ng-show="(message.messageTypeCode === 'outbound' || message.messageTypeCode === 'autoreply') && message.seenStatusCode === true" class="text-secondary text-muted" data-toggle="tooltip" title="Outbound">
+                    <img class="thread-message__status-icon" src="/assets/images/double-check.svg" alt="sending icon">
+                    Seen </span>
+                <span class="text-secondary text-muted">&bull;</span>
+
+                <!-- end: Status Icons -->
+                <span ng-class="{'thread-message__status text-danger': message.sendStatusCode === null || message.sendStatusCode === 'error','thread-message__status text-secondary text-muted': message.sendStatusCode  }">
+                    {{message.dateReceived | date : 'h:mm a'}} <span class="text-secondary text-muted">&bull;</span> {{message.channelTypeCode}} </span>
+                <span ng-show="message.channelTypeCode == 'viber'" class="thread-message--icon chat__viber" data-toggle="tooltip" title="Outbound"></span>
+                <span ng-show="message.channelTypeCode == 'sms'" class="thread-message--icon chat__sms" data-toggle="tooltip" title="Outbound"></span>
+                <span ng-show="message.channelTypeCode == 'whatsapp'" class="thread-message--icon chat__whatsapp" data-toggle="tooltip" title="Outbound"></span>
+                <span ng-show="message.channelTypeCode == 'messenger'" class="thread-message--icon chat__messenger" data-toggle="tooltip" title="Outbound"></span>
+                <span ng-show="message.channelTypeCode == 'wechat'" class="thread-message--icon chat__wechat" data-toggle="tooltip" title="Outbound"></span>
+                <span class="d-none thread-message__status text-danger">11:01 AM Sending Failed! <img src="/assets/images/sending-failed-icon.png" alt="sending failed icon"></span>
+
+              </p>
+            </div>
+            <div ng-show="message.sendStatusCode === 'error'" class="col-auto d-flex flex-column align-self-center">
+              <span class="chatbox-outbound&#45;&#45;icon outbound-resend__icon my-1" ng-class="{ 'disable-button': ctrl.service.busy }" data-toggle="tooltip" title="Resend" ng-click="resendOutbound(message.id, message.text, message.channelTypeCode, $index)"></span>
+              <span class="chatbox-outbound&#45;&#45;icon outbound-delete__icon my-1" data-toggle="tooltip" title="Delete Mesage" ng-click="deleteMessage(message, $index)"></span>
+            </div>
+          </div>
+        </div>
+        <!-- event-->
+        <div class="text-center pt-5" ng-if="message.messageTypeCode === 'event'">
+          <p class="reassign-events text-secondary text-muted small mb-0"><img src="/assets/images/reassign-icon.svg" alt=""> {{message.text}} </p>
+          <span class="text-center text-secondary text-muted small">{{message.dateReceived | date : 'MMMM d, yyyy'}} &bull; {{message.dateReceived | date : 'h:mm a'}} &bull; Not visible to the customer.</span>
+        </div>
+        <div class="row d-flex reassign-comments-wrapper p-3" ng-if="message.messageTypeCode === 'chatlog'">
+          <img class="col-auto reassign-comments-img p-0 float-left" src="/assets/images/reassign-comments-img.svg" alt="">
+          <p class="col comment-overflow-wrap float-left text-secondary text-muted small mb-0 px-0">{{message.text}}</p>
+        </div>
+      </div>
+    </div>
+    <div class="form-group character-counter mb-0" data="textMessage" count="count" len="len" remaining="remaining" limit-characters="charLimit" warning="warning" unicode="unicodeFlag">
+      <img ng-if="(messagesState.hasNext || messagesState.hasPrevious) || scrollPercent < 90" ng-click="ctrl.buttonDown()" class="chatbox-arrow__button" src="/assets/images/lastest-message-icon.svg" alt="lastest message icon">
+      <span ng-if="warning">warning</span>
+      <span class="character-count-display">{{len}}/{{charLimit}}</span>
+      <div class="row text-area-container mt-3 mb-1 " ng-class="{'d-none' : activeTickets <= 0}">
+        <textarea ng-hide="ctrl.mediaFiles.length > 0" class="textarea chat-form__textarea form-control mt-3 " ng-model="textMessage" ng-trim="false" id="exampleFormControlTextarea1" placeholder="Write something" role="textbox" contenteditable ></textarea>
+        <!--        <img ng-repeat="file in ctrl.mediaFiles" ng-if="(ctrl.mediaFiles.length > 0)" src="{{file.file}}"  class="img-thumbnail" style="height: 10rem" data-val="{{file}}">-->
+        <div class="cards-container">
+          <div class="card float-left mt-3 mb-2 ml-2 mr-2" ng-repeat="file in ctrl.mediaFiles" ng-if="(ctrl.mediaFiles.length > 0)" style="width: 8vw">
+            <div class="card-body chat-card-body p-2">
+              <a href class="btn-close-attachment input-remover" ng-click="removeMedia($index)" style="margin-left:8.3vw;"><i class="fa fa-times"></i></a>
+              <p class="text-secondary mb-0 text-nowrap chat-attachment-filename">{{file.fileName | limitTo: 15}} {{file.fileName.length  > 14 ? '...' : ''}}</p>
+              <span class="text-muted small">{{file.fileType | uppercase}}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex send-container">
+          <span tabindex="-1" class="thread-bottom-icon-attachment icon-attachment attachment-button" data-toggle="tooltip" ng-disabled="isMediaDisabled()" data-placement="auto" ng-click="ctrl.toggleClass()">
+              <div class="attachment-popup {{(ctrl.isAttachedPopupOpen)? '' : 'd-none'}}">
+                <a class="text-secondary btn btn-link p-0 border-0 d-flex" style="cursor: pointer;" multiple="multiple" accept=".jpg,.jpeg,.png,.bmp,.gif,.svg,.webp" ngf-select="ctrl.uploadMediaGroupFiles($files, 'image')" ngf-multiple="true"><img class="pr-1" src="/assets/images/chat-attachment-select-images-icon.svg" alt="attach images"> Images</a>
+                <!--                <a class="text-secondary btn btn-link p-0 border-0 d-flex" style="cursor: pointer;" multiple="multiple" accept=".avi,.wmv,.mov,.mp4,.m4v,.3gpp,.3gpp2,.asf,.mkv,.mp2ts,.webm" ngf-select="ctrl.uploadMediaGroupFiles($files, 'video')" ngf-multiple="true"><img class="pr-1" src="/assets/images/chat-attachment-select-videos-icon.svg" alt="attach images"> Videos</a>-->
+                <!--                <a class="text-secondary btn btn-link p-0 border-0 d-flex" style="cursor: pointer;" multiple="multiple" accept=".doc,.docx,.rtf,.dot,.dotx,.odt,.odf,.fodt,.txt,.info,.pdf,.xps,.pdax,.eps,.xls,.xlsx,.ods,.fods,.csv,.xlsm,.xltx" ngf-select="ctrl.uploadMediaGroupFiles($files, 'document')" ngf-multiple="true"><img class="pr-1" src="/assets/images/chat-attachment-select-files-icon.svg" alt="attach images"> Files</a>-->
+              </div>
+          </span>
+          <span class="thread-bottom-icon icon-send" data-toggle="tooltip" data-placement="top" title="Send" ng-disabled="isSendDisabled()" ng-click="sendOutbound()"></span>
+        </div>
+      </div>
+
+      <div class="row send_message_button p-2 d-none">
+        <div class="col-auto mr-auto px-0 d-flex align-items-center">
+          <div class="d-flex pr-2">
+            <span data-toggle="modal" data-target="#exampleModal" class="d-none thread-bottom-icon icon-attachment" ></span>
+          </div>
+        </div>
+        <div class="col-auto px-0 text-right  d-flex align-content-end ">
+          <div class="d-flex pr-2">
+            <div class="btn-group dropup">
+              <button type="button" class="btn btn-link px-0 text-secondary d-flex align-items-center dropdown-toggle mb-0 mr-3" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="col-auto px-0 text-right  d-flex align-content-end ">
+          <div class="d-flex pr-2">
+            <div class="btn-group dropup">
+              <button type="button" class="btn btn-link px-0 text-secondary d-flex align-items-center dropdown-toggle mb-0 mr-3" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <p class="mb-0">Send as Viber</p>
+              </button>
+              <div class="chatbox-sendas-dropdown dropdown-menu p-2" x-placement="top-start" style="position: absolute; transform: translate3d(0px, -2px, 0px); top: 0px; left: 0px; will-change: transform;">
+                <a class="text-secondary dropdown-item px-0" href="#"><img src="/assets/images/sms-icon.svg" alt="sms icon"> Send as SMS</a>
+                <a class="text-secondary dropdown-item px-0" href="#"><img src="/assets/images/whatsapp-icon.svg" alt="viber icon"> Send as WhatsApp</a>
+                <!-- <a class="text-secondary dropdown-item" href="#"><img src="/assets/images/viber-icon.svg" alt="viber icon"> Send as Viber</a> -->
+                <a class="text-secondary dropdown-item px-0" href="#"><img src="/assets/images/wechat-icon.svg" alt="wechat icon"> Send as WeChat</a>
+                <a class="text-secondary dropdown-item px-0" href="#"><img src="/assets/images/messenger-icon.svg" alt="messenger icon"> Send as Messenger</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Faild to Upload -->
+<div style="border-radius: 6px;" class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title" id="exampleModalLabel">Failed to Upload files</h5>
+      </div>
+      <div class="modal-body text-secondary text-muted">
+        The file you have selected is too large. The Maximum size is 25MB.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  var textarea = document.querySelector('textarea');
+  textarea.addEventListener('keydown', autosize);
+
+  function autosize(){
+    var el = this;
+    setTimeout(function(){
+      el.style.cssText = 'height:auto; padding:8px';
+      el.style.cssText = 'height:' + el.scrollHeight + 'px';
+    },0);
+  }
+</script>

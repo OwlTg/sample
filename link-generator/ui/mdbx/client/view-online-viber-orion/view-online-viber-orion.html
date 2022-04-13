@@ -1,0 +1,32 @@
+<div class="personal-container view-online-wrapper">
+  <div class="vert-align">
+    <div class="row box-design">
+      <div class="col-md-12">
+        <div class="row">
+          <div class="col-md-12">
+            <div style="padding-bottom:10px; text-align: center;">
+              <img class="view-online-centered-icon" src="{{viewOnlineViberOrion.data.icon}}" alt="centered icon">
+              <div>{{viewOnlineViberOrion.data.channel_name}}</div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="viber-campaign-message-container">
+            <div class="viewonline-message-wrapper min-height20px col-xs-12" ng-repeat="e in viewOnlineViberOrion.data.components" style="display:inline-flex;">
+              <div  ng-repeat="s in e">
+                <div class="float-left text-left" ng-if="s.type=='emoji'" class="float-left" ng-class="viewOnlineViberOrion.removeParentheses(s.content)">
+                  <!-- Problem: Class cannot read special character, so we need to convert it to tect only by using ng-class condition. Dollar, Exclamation, eightball -->
+                </div>
+                <span class="float-left text-left" ng-if="s.type=='text'" class="float-left">{{s.content}}</span>
+              </div>
+            </div>
+            <div class="p-1"><img class="view-online-image" src="{{viewOnlineViberOrion.data.image}}" alt=""></div>
+          </div>
+        </div>
+        <div class="row" style="margin-top: 1rem;">
+          <div class="col-12 text-center"><a href="{{viewOnlineViberOrion.data.url}}" ng-hide="!viewOnlineViberOrion.data.label" target="_blank" class="btn btn-viber">{{viewOnlineViberOrion.data.label}}</a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
